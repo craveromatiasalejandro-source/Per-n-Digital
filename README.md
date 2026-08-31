@@ -497,7 +497,7 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
       if (!apiKey) {
         configureApiKey();
         if (!apiKey) {
-          alert('Por favor ingrese su API Key de Gemini.');
+          alert(AQ.Ab8RN6JOphYSYoNxKzD1H-3saIPS540eJ0ofgSzNY0la4pF_1w);
           return;
         }
       }
