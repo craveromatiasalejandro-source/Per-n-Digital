@@ -182,7 +182,7 @@
       </div>
     </div>
     <div class="api-badge" onclick="configureApiKey()">
-      <span>🔑</span> <span>Cambiar Clave API</span>
+      <span>🔑</span> <span id="apiStatusText">Cambiar Clave API</span>
     </div>
   </header>
 
@@ -223,12 +223,18 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
     let chatHistory = [];
 
     function configureApiKey() {
-      const key = prompt('Ingrese su clave de Gemini (la que empieza con AIzaSy...):', apiKey);
+      const current = localStorage.getItem('GEMINI_API_KEY') || '';
+      const key = prompt('Ingrese su clave de Gemini (debe empezar con AIzaSy...):', current);
       if (key !== null) {
-        apiKey = key.trim();
-        localStorage.setItem('GEMINI_API_KEY', apiKey);
-        if (apiKey) {
-          alert('¡Clave guardada con éxito! Ya puedes chatear.');
+        const cleanKey = key.trim();
+        if (cleanKey === '') {
+          localStorage.removeItem('GEMINI_API_KEY');
+          apiKey = '';
+          alert('Clave eliminada.');
+        } else {
+          localStorage.setItem('GEMINI_API_KEY', cleanKey);
+          apiKey = cleanKey;
+          alert('¡Clave guardada con éxito! Ya puede realizar su consulta.');
         }
       }
     }
@@ -299,16 +305,39 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
       sendMessage();
     }
 
+    // Consulta en vivo qué modelos admite tu API Key
+    async function getSupportedModels(key) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+        const data = await res.json();
+        if (data && data.models && Array.isArray(data.models)) {
+          const valid = data.models
+            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name.replace('models/', ''));
+          if (valid.length > 0) return valid;
+        }
+      } catch (e) {
+        console.warn('Error consultando modelos disponibles:', e);
+      }
+      return [
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-lite',
+        'gemini-flash-latest',
+        'gemini-pro-latest'
+      ];
+    }
+
     async function sendMessage() {
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
       if (!text) return;
 
-      if (!apiKey) {
+      apiKey = localStorage.getItem('GEMINI_API_KEY') || apiKey;
+      if (!apiKey || apiKey.trim() === '') {
         configureApiKey();
-        if (!apiKey) {
-          return;
-        }
+        apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
+        if (!apiKey) return;
       }
 
       input.value = '';
@@ -318,55 +347,53 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
       showTypingIndicator();
       document.getElementById('sendBtn').disabled = true;
 
-      const modelsToTry = [
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-lite',
-        'gemini-1.5-flash'
-      ];
-
       let success = false;
       let lastErrorMessage = '';
 
+      const modelsToTry = await getSupportedModels(apiKey);
+
       for (const model of modelsToTry) {
-        try {
-          const contents = [...chatHistory];
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-              contents: contents,
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 8192
-              }
-            })
-          });
+        for (const apiVersion of ['v1beta', 'v1']) {
+          try {
+            const contents = [...chatHistory];
+            const response = await fetch(`https://generativelanguage.googleapis.com/${apiVersion}/models/${model}:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                contents: contents,
+                generationConfig: {
+                  temperature: 0.7,
+                  maxOutputTokens: 8192
+                }
+              })
+            });
 
-          const data = await response.json();
+            const data = await response.json();
 
-          if (data.error) {
-            lastErrorMessage = data.error.message;
-            continue;
-          }
-
-          const candidate = data.candidates?.[0];
-          const parts = candidate?.content?.parts;
-          
-          if (parts && parts.length > 0) {
-            const reply = parts.map(p => p.text || '').join('').trim();
-            if (reply) {
-              removeTypingIndicator();
-              appendMessage('peron', reply);
-              chatHistory.push({ role: 'model', parts: [{ text: reply }] });
-              success = true;
-              break;
+            if (data.error) {
+              lastErrorMessage = data.error.message;
+              continue;
             }
+
+            const candidate = data.candidates?.[0];
+            const parts = candidate?.content?.parts;
+            
+            if (parts && parts.length > 0) {
+              const reply = parts.map(p => p.text || '').join('').trim();
+              if (reply) {
+                removeTypingIndicator();
+                appendMessage('peron', reply);
+                chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+                success = true;
+                break;
+              }
+            }
+          } catch (err) {
+            lastErrorMessage = err.message;
           }
-        } catch (err) {
-          lastErrorMessage = err.message;
         }
+        if (success) break;
       }
 
       if (!success) {
