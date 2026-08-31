@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Perón Digital - Diálogo Histórico y Doctrina</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
       --text-muted: #94a3b8;
       --user-bubble: #1b3558;
       --peron-bubble: #172a45;
-      --border-color: rgba(117, 170, 219, 0.2);
+      --border-color: rgba(117, 170, 219, 0.25);
     }
 
     * {
@@ -29,38 +29,60 @@
       padding: 0;
     }
 
-    html, body {
+    html {
+      background-color: var(--bg-color);
       height: 100%;
-      width: 100%;
+      overflow-y: scroll; /* Barra vertical siempre activa */
     }
 
     body {
       font-family: 'Inter', sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      height: 100dvh;
-      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Barra de desplazamiento visible en el borde derecho */
+    ::-webkit-scrollbar {
+      width: 12px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090e17;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2a4365;
+      border: 2px solid #090e17;
+      border-radius: 6px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--sol-oro);
     }
 
     header {
-      flex-shrink: 0;
-      background: linear-gradient(180deg, var(--header-bg) 0%, rgba(15, 28, 48, 0.95) 100%);
-      border-bottom: 1px solid var(--border-color);
-      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(15, 28, 48, 0.96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 2px solid var(--border-color);
+      padding: 12px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      z-index: 10;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
     .header-branding {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .avatar {
@@ -73,14 +95,15 @@
       align-items: center;
       justify-content: center;
       font-size: 22px;
-      box-shadow: 0 0 10px rgba(252, 191, 73, 0.3);
+      box-shadow: 0 0 12px rgba(252, 191, 73, 0.35);
+      flex-shrink: 0;
     }
 
     .header-title h1 {
       font-family: 'Cinzel', serif;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
       color: var(--sol-oro-light);
     }
 
@@ -93,9 +116,9 @@
       background: rgba(117, 170, 219, 0.15);
       border: 1px solid var(--border-color);
       color: var(--celeste-light);
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -108,52 +131,36 @@
     }
 
     main {
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      padding: 16px;
-      padding-bottom: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      flex: 1 0 auto;
       max-width: 850px;
       width: 100%;
       margin: 0 auto;
-    }
-
-    main::-webkit-scrollbar {
-      width: 6px;
-    }
-    main::-webkit-scrollbar-track {
-      background: rgba(11, 19, 32, 0.5);
-    }
-    main::-webkit-scrollbar-thumb {
-      background: rgba(117, 170, 219, 0.4);
-      border-radius: 3px;
+      padding: 20px 16px 140px 16px; /* Espacio para que el pie nunca tape texto */
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
     }
 
     .welcome-card {
       background: linear-gradient(135deg, var(--card-bg) 0%, #172840 100%);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 14px;
+      padding: 20px;
       text-align: center;
-      margin-bottom: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
     .welcome-card h2 {
       font-family: 'Playfair Display', serif;
       color: var(--sol-oro);
-      font-size: 1.2rem;
-      margin-bottom: 6px;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
     }
 
     .welcome-card p {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     .suggestion-chips {
@@ -161,28 +168,31 @@
       flex-wrap: wrap;
       gap: 8px;
       justify-content: center;
-      margin-top: 12px;
+      margin-top: 14px;
     }
 
     .chip {
-      background: rgba(117, 170, 219, 0.1);
+      background: rgba(117, 170, 219, 0.12);
       border: 1px solid var(--border-color);
       color: var(--celeste-light);
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 0.78rem;
+      padding: 7px 14px;
+      border-radius: 18px;
+      font-size: 0.8rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
 
     .chip:hover {
-      background: rgba(117, 170, 219, 0.25);
+      background: rgba(117, 170, 219, 0.28);
+      border-color: var(--sol-oro);
+      transform: translateY(-1px);
     }
 
     .message-row {
       display: flex;
       gap: 12px;
       align-items: flex-start;
+      width: 100%;
     }
 
     .message-row.user {
@@ -190,52 +200,54 @@
     }
 
     .msg-avatar {
-      width: 34px;
-      height: 34px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 16px;
       flex-shrink: 0;
       background: #1f375b;
       border: 1px solid var(--border-color);
+      margin-top: 2px;
     }
 
     .message-bubble {
-      max-width: 80%;
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 0.92rem;
-      line-height: 1.5;
+      max-width: 85%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
       white-space: pre-wrap;
       word-break: break-word;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
     }
 
     .message-row.peron .message-bubble {
       background-color: var(--peron-bubble);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      border-top-left-radius: 2px;
+      border-top-left-radius: 4px;
     }
 
     .message-row.user .message-bubble {
       background-color: var(--user-bubble);
       border: 1px solid rgba(117, 170, 219, 0.4);
       color: #ffffff;
-      border-top-right-radius: 2px;
+      border-top-right-radius: 4px;
     }
 
     .typing-indicator {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 6px 10px;
+      gap: 6px;
+      padding: 10px 16px;
     }
 
     .dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       background-color: var(--sol-oro);
       border-radius: 50%;
       animation: blink 1.4s infinite both;
@@ -245,37 +257,46 @@
     .dot:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes blink {
-      0%, 80%, 100% { opacity: 0.3; }
-      40% { opacity: 1; }
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); }
+      40% { opacity: 1; transform: scale(1.15); }
     }
 
     footer {
-      flex-shrink: 0;
-      background: var(--header-bg);
-      border-top: 1px solid var(--border-color);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 28, 48, 0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 2px solid var(--border-color);
       padding: 12px 16px;
+      z-index: 1000;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    }
+
+    .footer-inner {
       max-width: 850px;
       width: 100%;
       margin: 0 auto;
-      z-index: 10;
     }
 
     .input-container {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
     }
 
     textarea {
       flex: 1;
-      background: #0d1726;
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 10px 16px;
+      background: #0a1320;
+      border: 1.5px solid var(--border-color);
+      border-radius: 22px;
+      padding: 12px 18px;
       color: var(--text-main);
       font-size: 0.95rem;
       resize: none;
-      height: 44px;
+      height: 48px;
       font-family: inherit;
       outline: none;
       transition: border-color 0.2s;
@@ -290,19 +311,50 @@
       color: #0b1320;
       border: none;
       border-radius: 50%;
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px rgba(252, 191, 73, 0.3);
+      transition: transform 0.1s, opacity 0.2s;
     }
 
     button.send-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+
+    button.send-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+
+    .scroll-btn {
+      position: fixed;
+      right: 20px;
+      bottom: 80px;
+      background: #1f375b;
+      border: 1px solid var(--sol-oro);
+      color: var(--sol-oro);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 900;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      opacity: 0.85;
+    }
+    .scroll-btn:hover {
+      opacity: 1;
+      transform: translateY(2px);
     }
   </style>
 </head>
@@ -333,10 +385,14 @@
     </div>
   </main>
 
+  <div class="scroll-btn" onclick="scrollToBottomSmooth()" title="Ir al final">↓</div>
+
   <footer>
-    <div class="input-container">
-      <textarea id="messageInput" placeholder="Escriba su consulta o reflexión..." rows="1"></textarea>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+    <div class="footer-inner">
+      <div class="input-container">
+        <textarea id="messageInput" placeholder="Escriba su consulta o reflexión..." rows="1"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+      </div>
     </div>
   </footer>
 
@@ -367,13 +423,20 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne y cercana a
       }
     }
 
+    function scrollToBottomSmooth() {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight || document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+
     function scrollToBottom() {
-      const container = document.getElementById('chatContainer');
-      if (container) {
-        setTimeout(() => {
-          container.scrollTop = container.scrollHeight;
-        }, 50);
-      }
+      setTimeout(() => {
+        window.scrollTo({
+          top: document.documentElement.scrollHeight || document.body.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 60);
     }
 
     function appendMessage(role, text) {
@@ -465,7 +528,7 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne y cercana a
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
               contents: contents,
-              generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+              generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
             })
           });
 
@@ -495,6 +558,7 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne y cercana a
       }
 
       document.getElementById('sendBtn').disabled = false;
+      scrollToBottom();
     }
 
     document.getElementById('messageInput').addEventListener('keydown', (e) => {
