@@ -415,7 +415,7 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
     updateApiStatus();
 
     function configureApiKey() {
-      const key = prompt('Ingrese su Gemini API Key:', apiKey);
+      const key = prompt(AQ.Ab8RN6JOphYSYoNxKzD1H-3saIPS540eJ0ofgSzNY0la4pF_1w);
       if (key !== null) {
         apiKey = key.trim();
         localStorage.setItem('GEMINI_API_KEY', apiKey);
