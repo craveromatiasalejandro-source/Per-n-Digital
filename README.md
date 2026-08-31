@@ -70,12 +70,13 @@
     .header-title p { font-size: 0.75rem; color: var(--celeste-light); }
 
     .api-badge {
-      background: rgba(117, 170, 219, 0.15);
-      border: 1px solid var(--border-color);
-      color: var(--celeste-light);
+      background: rgba(252, 191, 73, 0.15);
+      border: 1px solid var(--sol-oro);
+      color: var(--sol-oro-light);
       padding: 8px 14px;
       border-radius: 20px;
       font-size: 0.8rem;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -83,8 +84,8 @@
       transition: all 0.2s;
     }
     .api-badge:hover {
-      background: rgba(117, 170, 219, 0.3);
-      border-color: var(--sol-oro);
+      background: rgba(252, 191, 73, 0.3);
+      transform: scale(1.03);
     }
 
     main {
@@ -181,7 +182,7 @@
       </div>
     </div>
     <div class="api-badge" onclick="configureApiKey()">
-      <span>🔑</span> <span id="apiStatusText">Configurar Clave</span>
+      <span>🔑</span> <span>Cambiar Clave API</span>
     </div>
   </header>
 
@@ -221,20 +222,11 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
     let apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
     let chatHistory = [];
 
-    function updateApiStatus() {
-      const el = document.getElementById('apiStatusText');
-      if (el) {
-        el.textContent = apiKey ? 'Clave Activa' : 'Configurar Clave';
-      }
-    }
-    updateApiStatus();
-
     function configureApiKey() {
       const key = prompt('Ingrese su clave de Gemini (la que empieza con AIzaSy...):', apiKey);
       if (key !== null) {
         apiKey = key.trim();
         localStorage.setItem('GEMINI_API_KEY', apiKey);
-        updateApiStatus();
         if (apiKey) {
           alert('¡Clave guardada con éxito! Ya puedes chatear.');
         }
@@ -329,8 +321,8 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
       const modelsToTry = [
         'gemini-2.5-flash',
         'gemini-2.0-flash',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro'
+        'gemini-2.0-flash-lite',
+        'gemini-1.5-flash'
       ];
 
       let success = false;
@@ -379,7 +371,7 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
 
       if (!success) {
         removeTypingIndicator();
-        appendMessage('peron', 'Ha ocurrido una dificultad con la conexión: ' + (lastErrorMessage || 'Verifique que su clave empiece con AIzaSy y sea válida.'));
+        appendMessage('peron', 'Ha ocurrido una dificultad con la conexión: ' + (lastErrorMessage || 'Verifique que su clave de API sea válida.'));
       }
 
       document.getElementById('sendBtn').disabled = false;
