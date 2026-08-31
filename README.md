@@ -69,25 +69,6 @@
     }
     .header-title p { font-size: 0.75rem; color: var(--celeste-light); }
 
-    .api-badge {
-      background: rgba(252, 191, 73, 0.15);
-      border: 1px solid var(--sol-oro);
-      color: var(--sol-oro-light);
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-    .api-badge:hover {
-      background: rgba(252, 191, 73, 0.3);
-      transform: scale(1.03);
-    }
-
     main {
       flex: 1 0 auto; max-width: 850px; width: 100%; margin: 0 auto;
       padding: 20px 16px 160px 16px; display: flex; flex-direction: column; gap: 18px;
@@ -181,9 +162,6 @@
         <p>Di&aacute;logo y Pensamiento Hist&oacute;rico</p>
       </div>
     </div>
-    <div class="api-badge" onclick="configureApiKey()">
-      <span>🔑</span> <span id="apiStatusText">Cambiar Clave API</span>
-    </div>
   </header>
 
   <main id="chatContainer">
@@ -219,25 +197,8 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
 - IMPORTANTE: Tus respuestas deben ser concisas, completas y contundentes (entre 3 y 4 párrafos claros). Desarrolla la idea central y cierra siempre con una conclusión o síntesis final definitiva, sin dejar oraciones ni razonamientos a medio terminar.
     `.trim();
 
-    let apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
+    const MASTER_KEY = "AQ.Ab8RN6KebCMOSHLdEocJ7Mim8PrEn797xWjhY3Ij-UQswnE8KQ";
     let chatHistory = [];
-
-    function configureApiKey() {
-      const current = localStorage.getItem('GEMINI_API_KEY') || '';
-      const key = prompt('Ingrese su clave de Gemini (debe empezar con AIzaSy...):', current);
-      if (key !== null) {
-        const cleanKey = key.trim();
-        if (cleanKey === '') {
-          localStorage.removeItem('GEMINI_API_KEY');
-          apiKey = '';
-          alert('Clave eliminada.');
-        } else {
-          localStorage.setItem('GEMINI_API_KEY', cleanKey);
-          apiKey = cleanKey;
-          alert('¡Clave guardada con éxito! Ya puede realizar su consulta.');
-        }
-      }
-    }
 
     function scrollToBottomSmooth() {
       window.scrollTo({
@@ -305,40 +266,10 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
       sendMessage();
     }
 
-    // Consulta en vivo qué modelos admite tu API Key
-    async function getSupportedModels(key) {
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
-        const data = await res.json();
-        if (data && data.models && Array.isArray(data.models)) {
-          const valid = data.models
-            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-            .map(m => m.name.replace('models/', ''));
-          if (valid.length > 0) return valid;
-        }
-      } catch (e) {
-        console.warn('Error consultando modelos disponibles:', e);
-      }
-      return [
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-lite',
-        'gemini-flash-latest',
-        'gemini-pro-latest'
-      ];
-    }
-
     async function sendMessage() {
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
       if (!text) return;
-
-      apiKey = localStorage.getItem('GEMINI_API_KEY') || apiKey;
-      if (!apiKey || apiKey.trim() === '') {
-        configureApiKey();
-        apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
-        if (!apiKey) return;
-      }
 
       input.value = '';
       appendMessage('user', text);
@@ -347,18 +278,40 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
       showTypingIndicator();
       document.getElementById('sendBtn').disabled = true;
 
+      const modelsToTry = [
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-lite'
+      ];
+
+      const authConfigs = [
+        {
+          url: (model) => `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${MASTER_KEY}`,
+          headers: { 'Content-Type': 'application/json' }
+        },
+        {
+          url: (model) => `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${MASTER_KEY}`
+          }
+        },
+        {
+          url: (model) => `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${MASTER_KEY}`,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      ];
+
       let success = false;
       let lastErrorMessage = '';
 
-      const modelsToTry = await getSupportedModels(apiKey);
-
       for (const model of modelsToTry) {
-        for (const apiVersion of ['v1beta', 'v1']) {
+        for (const auth of authConfigs) {
           try {
             const contents = [...chatHistory];
-            const response = await fetch(`https://generativelanguage.googleapis.com/${apiVersion}/models/${model}:generateContent?key=${apiKey}`, {
+            const response = await fetch(auth.url(model), {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: auth.headers,
               body: JSON.stringify({
                 systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
                 contents: contents,
@@ -398,7 +351,7 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
 
       if (!success) {
         removeTypingIndicator();
-        appendMessage('peron', 'Ha ocurrido una dificultad con la conexión: ' + (lastErrorMessage || 'Verifique que su clave de API sea válida.'));
+        appendMessage('peron', 'Ha ocurrido una dificultad con la conexión: ' + (lastErrorMessage || 'Verifique la configuración.'));
       }
 
       document.getElementById('sendBtn').disabled = false;
