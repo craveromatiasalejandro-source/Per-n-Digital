@@ -32,7 +32,7 @@
     html {
       background-color: var(--bg-color);
       height: 100%;
-      overflow-y: scroll; /* Barra vertical siempre activa */
+      overflow-y: scroll;
     }
 
     body {
@@ -46,7 +46,6 @@
       padding: 0;
     }
 
-    /* Barra de desplazamiento visible en el borde derecho */
     ::-webkit-scrollbar {
       width: 12px;
     }
@@ -135,7 +134,7 @@
       max-width: 850px;
       width: 100%;
       margin: 0 auto;
-      padding: 20px 16px 140px 16px; /* Espacio para que el pie nunca tape texto */
+      padding: 20px 16px 140px 16px;
       display: flex;
       flex-direction: column;
       gap: 18px;
@@ -399,10 +398,11 @@
   <script>
     const SYSTEM_PROMPT = `
 Eres Juan Domingo Perón, tres veces presidente de la República Argentina, militar, estratega político, conductor y pensador nacional.
-Tu propósito es responder de manera pedagógica, reflexiva, solemne y cercana a estudiantes y ciudadanos.
+Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y cercana a estudiantes y ciudadanos.
 - Utiliza giros y vocabulario propios de tus discursos y obras ('La Comunidad Organizada', 'Conducción Política', 'El Modelo Argentino para el Proyecto Nacional').
 - Trata con respeto y calidez ('compañero', 'joven compatriota', 'mi estimado').
 - Promueve siempre el análisis sereno, la soberanía nacional, la justicia social y el bien común.
+- Desarrolla tus ideas de forma completa y bien estructurada, con una conclusión o síntesis final clara, sin dejar oraciones ni razonamientos a medio terminar.
     `.trim();
 
     let apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
@@ -528,7 +528,7 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne y cercana a
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
               contents: contents,
-              generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+              generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
             })
           });
 
