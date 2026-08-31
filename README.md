@@ -100,7 +100,7 @@
 
     .header-title h1 {
       font-family: 'Cinzel', serif;
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: 700;
       letter-spacing: 0.8px;
       color: var(--sol-oro-light);
@@ -111,30 +111,12 @@
       color: var(--celeste-light);
     }
 
-    .api-badge {
-      background: rgba(117, 170, 219, 0.15);
-      border: 1px solid var(--border-color);
-      color: var(--celeste-light);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-
-    .api-badge:hover {
-      background: rgba(117, 170, 219, 0.3);
-    }
-
     main {
       flex: 1 0 auto;
       max-width: 850px;
       width: 100%;
       margin: 0 auto;
-      padding: 20px 16px 140px 16px;
+      padding: 20px 16px 160px 16px;
       display: flex;
       flex-direction: column;
       gap: 18px;
@@ -363,19 +345,16 @@
     <div class="header-branding">
       <div class="avatar">🏛️</div>
       <div class="header-title">
-        <h1>PERÓN DIGITAL</h1>
-        <p>Diálogo y Pensamiento Histórico</p>
+        <h1>Per&oacute;n Digital</h1>
+        <p>Di&aacute;logo y Pensamiento Hist&oacute;rico</p>
       </div>
-    </div>
-    <div class="api-badge" onclick="configureApiKey()">
-      <span>🔑</span> <span id="apiStatusText">Clave API</span>
     </div>
   </header>
 
   <main id="chatContainer">
     <div class="welcome-card">
-      <h2>"Conducción y Organización"</h2>
-      <p>Bienvenido. Formule sus consultas sobre doctrina política, justicia social, soberanía económica o el Modelo Argentino para el Proyecto Nacional.</p>
+      <h2>"Conducci&oacute;n y Organizaci&oacute;n"</h2>
+      <p>Bienvenido. Formule sus consultas sobre doctrina pol&iacute;tica, justicia social, soberan&iacute;a econ&oacute;mica o el Modelo Argentino para el Proyecto Nacional.</p>
       <div class="suggestion-chips">
         <div class="chip" onclick="askSuggestion('¿Cuál es el concepto de la Comunidad Organizada?')">📖 Comunidad Organizada</div>
         <div class="chip" onclick="askSuggestion('¿Cómo concebía la Justicia Social y la Independencia Económica?')">⚖️ Las 3 Banderas</div>
@@ -402,26 +381,12 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
 - Utiliza giros y vocabulario propios de tus discursos y obras ('La Comunidad Organizada', 'Conducción Política', 'El Modelo Argentino para el Proyecto Nacional').
 - Trata con respeto y calidez ('compañero', 'joven compatriota', 'mi estimado').
 - Promueve siempre el análisis sereno, la soberanía nacional, la justicia social y el bien común.
-- Desarrolla tus ideas de forma completa y bien estructurada, con una conclusión o síntesis final clara, sin dejar oraciones ni razonamientos a medio terminar.
+- IMPORTANTE: Tus respuestas deben ser concisas, completas y contundentes (entre 3 y 4 párrafos claros). Desarrolla la idea central y cierra siempre con una conclusión o síntesis final definitiva, sin dejar oraciones ni razonamientos a medio terminar.
     `.trim();
 
-    let apiKey = localStorage.getItem('GEMINI_API_KEY') || '';
+    // API Key incluida de forma automática:
+    const apiKey = "AQ.Ab8RN6JOphYSYoNxKzD1H-3saIPS540eJ0ofgSzNY0la4pF_1w";
     let chatHistory = [];
-
-    function updateApiStatus() {
-      const el = document.getElementById('apiStatusText');
-      el.textContent = apiKey ? 'Clave Activa' : 'Configurar API Key';
-    }
-    updateApiStatus();
-
-    function configureApiKey() {
-      const key = prompt(AQ.Ab8RN6JOphYSYoNxKzD1H-3saIPS540eJ0ofgSzNY0la4pF_1w);
-      if (key !== null) {
-        apiKey = key.trim();
-        localStorage.setItem('GEMINI_API_KEY', apiKey);
-        updateApiStatus();
-      }
-    }
 
     function scrollToBottomSmooth() {
       window.scrollTo({
@@ -494,14 +459,6 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
       const text = input.value.trim();
       if (!text) return;
 
-      if (!apiKey) {
-        configureApiKey();
-        if (!apiKey) {
-          alert(AQ.Ab8RN6JOphYSYoNxKzD1H-3saIPS540eJ0ofgSzNY0la4pF_1w);
-          return;
-        }
-      }
-
       input.value = '';
       appendMessage('user', text);
       chatHistory.push({ role: 'user', parts: [{ text }] });
@@ -528,7 +485,10 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
               contents: contents,
-              generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 8192
+              }
             })
           });
 
@@ -539,13 +499,18 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
             continue;
           }
 
-          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (reply) {
-            removeTypingIndicator();
-            appendMessage('peron', reply.trim());
-            chatHistory.push({ role: 'model', parts: [{ text: reply.trim() }] });
-            success = true;
-            break;
+          const candidate = data.candidates?.[0];
+          const parts = candidate?.content?.parts;
+          
+          if (parts && parts.length > 0) {
+            const reply = parts.map(p => p.text || '').join('').trim();
+            if (reply) {
+              removeTypingIndicator();
+              appendMessage('peron', reply);
+              chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+              success = true;
+              break;
+            }
           }
         } catch (err) {
           lastErrorMessage = err.message;
@@ -554,7 +519,7 @@ Tu propósito es responder de manera pedagógica, reflexiva, solemne, clara y ce
 
       if (!success) {
         removeTypingIndicator();
-        appendMessage('peron', 'Ha ocurrido una dificultad técnica con la conexión: ' + (lastErrorMessage || 'Verifique su clave de API.'));
+        appendMessage('peron', 'Ha ocurrido una dificultad técnica con la conexión: ' + (lastErrorMessage || 'Verifique la clave de API.'));
       }
 
       document.getElementById('sendBtn').disabled = false;
